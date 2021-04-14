@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.musicg.api.ClapApi;
 import com.musicg.fingerprint.FingerprintSimilarity;
 import com.musicg.wave.Wave;
 
@@ -124,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
-
             try {
                 os.close();
             } catch (IOException e) {
@@ -256,14 +256,28 @@ public class MainActivity extends AppCompatActivity {
 
     private void compareAudio() {
         Wave recorded = new Wave(outputName); // Base Audio file
-        InputStream fs = this.getResources().openRawResource(R.raw.footsteps);
-        Wave footsteps = new Wave(fs); // Audio file to compare
+        InputStream dog = this.getResources().openRawResource(R.raw.dog);
+        InputStream clap = this.getResources().openRawResource(R.raw.clapping);
+        InputStream speaking = this.getResources().openRawResource(R.raw.speaking);
+        Wave clp = new Wave(clap); // Audio file to compare
+        Wave dg = new Wave(dog);
+        Wave spk = new Wave(speaking);
         // Finding Audio Fingerprint Similarity
-        FingerprintSimilarity fps = recorded.getFingerprintSimilarity(footsteps);
-        float score = fps.getScore();
-        float sim = fps.getSimilarity();
-        Log.e("sim", Float.toString(sim));
-        simBox.setText("Footstep Score: " + Float.toString(sim));
+        FingerprintSimilarity clps = recorded.getFingerprintSimilarity(clp);
+        FingerprintSimilarity dgs = recorded.getFingerprintSimilarity(dg);
+        FingerprintSimilarity spks = recorded.getFingerprintSimilarity(spk);
+        float clpsim = clps.getSimilarity();
+        float dgsim = dgs.getSimilarity();
+        float spksim = spks.getSimilarity();
+        String noise = "";
+        if (clpsim > dgsim && clpsim > spksim) {
+            noise = "CLAP";
+        } else if (dgsim > spksim) {
+            noise = "DOG";
+        } else {
+            noise = "SPEAKING";
+        }
+        simBox.setText(noise);
     }
 
     private View.OnClickListener btnClick = new View.OnClickListener() {
